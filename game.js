@@ -235,3 +235,60 @@ class FireRain extends Fireball {
     this.pos = this.beginPosition;
   }
 }
+
+class Coin extends Actor {
+  constructor(position = new Vector(0, 0)) {
+    const pos = position.plus(new Vector(0.2, 0.1));
+    super(pos, new Vector(0.6, 0.6));
+    this.springSpeed = 8;
+    this.springDist = 0.07;
+    this.spring = Math.random() * 2 * Math.PI;
+    this.startPos = this.pos;
+  }
+
+  get type() {
+    return 'coin';
+  }
+
+  updateSpring(number = 1) {
+    this.spring += this.springSpeed * number;
+  }
+
+  getSpringVector() {
+    return new Vector(0, Math.sin(this.spring) * this.springDist);
+  }
+
+  getNextPosition(number = 1) {
+    this.updateSpring(number);
+    return this.startPos.plus(this.getSpringVector());
+  }
+
+  act(time) {
+    this.pos = this.getNextPosition(time);
+  }
+}
+
+class Player extends Actor {
+  constructor(position = new Vector(0, 0)) {
+    super(position.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5));
+  }
+
+  get type() {
+    return 'player';
+  }
+}
+
+
+const actorDict = {
+    '@': Player,
+    'o': Coin,
+    '=': HorizontalFireball,
+    '|': VerticalFireball,
+    'v': FireRain
+};
+
+const parser = new LevelParser(actorDict);
+
+loadLevels()
+    .then((res) => {runGame(JSON.parse(res), parser, DOMDisplay)
+    .then(() => alert('Мои поздравления, вы победили!'))});
